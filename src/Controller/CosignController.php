@@ -15,14 +15,14 @@ use Symfony\Component\HttpFoundation\Cookie;
 
 class CosignController extends ControllerBase {
 
-  public function cosign_logout(Request $request) {
+  public function logout(Request $request) {
     $uname = \Drupal::currentUser()->getAccountName();
     if (\Drupal::config('cosign.settings')->get('cosign_allow_cosign_anons') == 0 ||
        (Functions::is_friend_account($uname) && 
        \Drupal::config('cosign.settings')->get('cosign_allow_friend_accounts') == 0)
       )
     {
-      $response = CosignController::cosign_cosignlogout();
+      $response = CosignController::cosign_logout();
     }
     else {
       if (isset($_SERVER['HTTP_REFERER'])) {
@@ -45,7 +45,7 @@ class CosignController extends ControllerBase {
   }
 
   //Send this over to an event handler after forcing https.
-  public function cosign_login(Request $request) {
+  public function login(Request $request) {
     $request_uri = $request->getRequestUri();
     global $base_path;
     if (!Functions::is_https()) {
@@ -82,7 +82,7 @@ class CosignController extends ControllerBase {
     }
   }
 
-  public function cosign_cosignlogout() {
+  public function cosign_logout() {
     $logout = Functions::logout_url();
     user_logout();
     $response = new TrustedRedirectResponse($logout);

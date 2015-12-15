@@ -10,7 +10,7 @@ cosign.logout:
   path: /user/logout
   defaults:
     _title: Cosign Logout
-    _controller: '\Drupal\cosign\Controller\CosignController::cosign_logout'
+    _controller: '\Drupal\cosign\Controller\CosignController::logout'
   options:
     no_cache: TRUE
   requirements:
@@ -20,7 +20,7 @@ cosign.cosignlogout:
   path: /cosign/logout
   defaults:
     _title: Cosign Logout
-    _controller: '\Drupal\cosign\Controller\CosignController::cosign_cosignlogout'
+    _controller: '\Drupal\cosign\Controller\CosignController::cosign_logout'
   options:
     no_cache: TRUE
   requirements:
@@ -30,7 +30,7 @@ cosign.login:
   path: /user/login
   defaults:
     _title: Cosign Login
-    _controller: '\Drupal\cosign\Controller\CosignController::cosign_login'
+    _controller: '\Drupal\cosign\Controller\CosignController::login'
   options:
     no_cache: TRUE
   requirements:
@@ -40,7 +40,7 @@ cosign.register:
   path: /user/register
   defaults:
     _title: Cosign Login
-    _controller: '\Drupal\cosign\Controller\CosignController::cosign_login'
+    _controller: '\Drupal\cosign\Controller\CosignController::login'
   options:
     no_cache: TRUE
   requirements:
