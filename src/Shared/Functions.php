@@ -17,7 +17,7 @@ class Functions {
    * @return
    *   User object
    */
-  public static function cosign_user_status($cosign_username) {
+  public static function user_status($cosign_username) {
     $user = \Drupal::currentUser();
     $uname = $user->getAccountName();
     $drupal_user = user_load_by_name($cosign_username);
@@ -30,10 +30,10 @@ class Functions {
       }
     }
     if (!empty($cosign_username)){
-      $is_friend_account = self::cosign_is_friend_account($cosign_username);
+      $is_friend_account = self::is_friend_account($cosign_username);
       // If friend accounts are not allowed, log them out
       if (\Drupal::config('cosign.settings')->get('cosign_allow_friend_accounts') == 0 && $is_friend_account) {
-        self::cosign_friend_not_allowed();
+        self::friend_not_allowed();
         if (\Drupal::config('cosign.settings')->get('cosign_allow_anons_on_https') == 1){
           return user_load(0);
         }
@@ -44,12 +44,12 @@ class Functions {
     }
     if (!empty($cosign_username) && !empty($drupal_user) && empty($uname)) {
       //login the cosign user
-      self::cosign_login_user($drupal_user);
+      self::login_user($drupal_user);
     }
     elseif (!empty($cosign_username) && empty($drupal_user)) {
       //cosign user doesn't have a drupal account
       if (\Drupal::config('cosign.settings')->get('cosign_autocreate') == 1) {
-        $new_user = self::cosign_create_new_user($cosign_username);
+        $new_user = self::create_new_user($cosign_username);
         user_load($new_user->id(), TRUE);
       }
       else {
@@ -78,10 +78,10 @@ class Functions {
    * @return
    *   User Object
    */
-  public static function cosign_login_user($drupal_user) {
+  public static function login_user($drupal_user) {
     user_login_finalize($drupal_user);
     $the_user = \Drupal::currentUser();
-    $username = self::cosign_retrieve_remote_user();
+    $username = self::retrieve_remote_user();
     if ($the_user->getAccountName() != $username) {
       \Drupal::logger('cosign')->notice('User attempted login and the cosign username: @remote_user, did not match the drupal username: @drupal_user', array('@remote_user' => $username, '@drupal_user' => $the_user->getAccountName()));
       user_logout();
@@ -96,7 +96,7 @@ class Functions {
    * @return
    *   null
    */
-  public static function cosign_friend_not_allowed() {
+  public static function friend_not_allowed() {
     \Drupal::logger('cosign')->notice('User attempted login using a university friend account and the friend account configuration setting is turned off: @remote_user', array('@remote_user' => $username));
     drupal_set_message(t(\Drupal::config('cosign.settings')->get('cosign_friend_account_message')), 'warning');
     if (\Drupal::config('cosign.settings')->get('cosign_allow_anons_on_https') == 1) {
@@ -108,7 +108,7 @@ class Functions {
     }
   }
   
-  public function cosign_logout_url() {
+  public function logout_url() {
     $logout_path = \Drupal::config('cosign.settings')->get('cosign_logout_path');
     $logout_to = \Drupal::config('cosign.settings')->get('cosign_logout_to');
     return $logout_path . '?' . $logout_to;
@@ -123,7 +123,7 @@ class Functions {
    * @return
    *   String username or empty string.
    */
-  public static function cosign_retrieve_remote_user() {
+  public static function retrieve_remote_user() {
     $cosign_name = '';
     // Make sure we get the remote user whichever way it is available.
     if (isset($_SERVER['REDIRECT_REMOTE_USER'])) {
@@ -146,7 +146,7 @@ class Functions {
    *   Boolean TRUE or FALSE.
    */
 
-  public static function cosign_is_https() {
+  public static function is_https() {
     $is_https = FALSE;
     if (\Drupal::request()->server->get('protossl') == 's') {
       $is_https = TRUE;
@@ -164,7 +164,7 @@ class Functions {
    * @return
    *   Boolean TRUE or FALSE.
    */
-  public static function cosign_is_friend_account($username) {
+  public static function is_friend_account($username) {
     // Make sure we get friend whichever way it is available.
     $is_friend_account = FALSE;
     if ($_SERVER['REMOTE_REALM'] == 'friend' || stristr($username, '@')) {
@@ -180,13 +180,13 @@ class Functions {
    * @return
    *   Object user account.
    */
-  public static function cosign_create_new_user($cosign_name){
+  public static function create_new_user($cosign_name){
     if (\Drupal::config('cosign.settings')->get('cosign_autocreate') == 1) {
       $new_user = array();
       $new_user['name'] = $cosign_name;
       $new_user['status'] = 1;
       $new_user['password'] = user_password();
-      if (self::cosign_is_friend_account($cosign_name)) {
+      if (self::is_friend_account($cosign_name)) {
         // friend account
         $new_user['mail'] = $cosign_name;
       }
@@ -197,7 +197,7 @@ class Functions {
       $account->enforceIsNew();
       $account->save();
 
-      return self::cosign_login_user($account);
+      return self::login_user($account);
     }
   }
 }

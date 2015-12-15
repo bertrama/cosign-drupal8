@@ -18,7 +18,7 @@ class CosignController extends ControllerBase {
   public function cosign_logout(Request $request) {
     $uname = \Drupal::currentUser()->getAccountName();
     if (\Drupal::config('cosign.settings')->get('cosign_allow_cosign_anons') == 0 ||
-       (Functions::cosign_is_friend_account($uname) && 
+       (Functions::is_friend_account($uname) && 
        \Drupal::config('cosign.settings')->get('cosign_allow_friend_accounts') == 0)
       )
     {
@@ -48,14 +48,14 @@ class CosignController extends ControllerBase {
   public function cosign_login(Request $request) {
     $request_uri = $request->getRequestUri();
     global $base_path;
-    if (!Functions::cosign_is_https()) {
+    if (!Functions::is_https()) {
       return new TrustedRedirectResponse('https://' . $_SERVER['HTTP_HOST'] . $request_uri);
     }
     else {
       if ($request_uri == $base_path){
         //The front page is set to /user. we have to login here to avoid a redirect loop
-        $username = Functions::cosign_retrieve_remote_user();
-        $user = Functions::cosign_user_status($username);
+        $username = Functions::retrieve_remote_user();
+        $user = Functions::user_status($username);
         if (empty($user) || $user->id() == 0) {
           $response = array(
             '#type' => 'markup',
@@ -83,7 +83,7 @@ class CosignController extends ControllerBase {
   }
 
   public function cosign_cosignlogout() {
-    $logout = Functions::cosign_logout_url();
+    $logout = Functions::logout_url();
     user_logout();
     $response = new TrustedRedirectResponse($logout);
     //this had to be done of user was logged into cosign/drupal for several minutes after logging out

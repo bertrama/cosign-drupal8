@@ -13,7 +13,7 @@ class CosignSubscriber implements EventSubscriberInterface {
     $request_uri = $event->getRequest()->getRequestUri();
     if (strpos($request_uri, 'user/login') || strpos($request_uri, 'user/register')) {
       $response = $event->getResponse();
-      if (!Functions::cosign_is_https() 
+      if (!Functions::is_https() 
         //&& strpos($response->getTargetUrl(), 'ttps://')
       ) {
         //settargeturl will not work if not an event from a redirect
@@ -27,7 +27,7 @@ class CosignSubscriber implements EventSubscriberInterface {
       }
       else {
         $destination = \Drupal::destination()->getAsArray()['destination'];
-        $username = Functions::cosign_retrieve_remote_user();
+        $username = Functions::retrieve_remote_user();
         global $base_path;
         if (!$username && \Drupal::config('cosign.settings')->get('cosign_allow_anons_on_https') == 1) {
           $request_uri = \Drupal::config('cosign.settings')->get('cosign_login_path').'?cosign-'.$_SERVER['HTTP_HOST'].'&https://'.$_SERVER['HTTP_HOST'];
@@ -37,7 +37,7 @@ class CosignSubscriber implements EventSubscriberInterface {
           $request_uri = $request_uri . $destination;
         }
         else {
-          Functions::cosign_user_status($username);
+          Functions::user_status($username);
           if ($request_uri == $base_path.'user/login' || $request_uri == $base_path.'user/register') {
             $request_uri = $base_path;
           }
@@ -60,4 +60,3 @@ class CosignSubscriber implements EventSubscriberInterface {
     return $events;
   }
 }
-?>

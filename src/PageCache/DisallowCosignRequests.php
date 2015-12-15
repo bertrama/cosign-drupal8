@@ -27,7 +27,7 @@ class DisallowCosignRequests implements RequestPolicyInterface {
    * {@inheritdoc}
    */
   public function check(Request $request) {
-    $username = Functions::cosign_retrieve_remote_user();
+    $username = Functions::retrieve_remote_user();
     if (isset($username) && $username != '') {
       return self::DENY;
     }
