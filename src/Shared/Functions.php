@@ -2,15 +2,15 @@
 
 /**
  * @file
- * Contains Drupal\cosign\CosignFunctions\CosignSharedFunctions.
+ * Contains Drupal\cosign\Shared\Functions.
  */
 
-namespace Drupal\cosign\CosignFunctions;
+namespace Drupal\cosign\Shared;
 
 /**
  * Cosign shared functions.
  */
-class CosignSharedFunctions {
+class Functions {
   /**
    * Check whether user is loggedin to cosign, is a drupal user, and is logged into drupal
    *
@@ -30,10 +30,10 @@ class CosignSharedFunctions {
       }
     }
     if (!empty($cosign_username)){
-      $is_friend_account = CosignSharedFunctions::cosign_is_friend_account($cosign_username);
+      $is_friend_account = self::cosign_is_friend_account($cosign_username);
       // If friend accounts are not allowed, log them out
       if (\Drupal::config('cosign.settings')->get('cosign_allow_friend_accounts') == 0 && $is_friend_account) {
-        CosignSharedFunctions::cosign_friend_not_allowed();
+        self::cosign_friend_not_allowed();
         if (\Drupal::config('cosign.settings')->get('cosign_allow_anons_on_https') == 1){
           return user_load(0);
         }
@@ -44,12 +44,12 @@ class CosignSharedFunctions {
     }
     if (!empty($cosign_username) && !empty($drupal_user) && empty($uname)) {
       //login the cosign user
-      CosignSharedFunctions::cosign_login_user($drupal_user);
+      self::cosign_login_user($drupal_user);
     }
     elseif (!empty($cosign_username) && empty($drupal_user)) {
       //cosign user doesn't have a drupal account
       if (\Drupal::config('cosign.settings')->get('cosign_autocreate') == 1) {
-        $new_user = CosignSharedFunctions::cosign_create_new_user($cosign_username);
+        $new_user = self::cosign_create_new_user($cosign_username);
         user_load($new_user->id(), TRUE);
       }
       else {
@@ -81,7 +81,7 @@ class CosignSharedFunctions {
   public static function cosign_login_user($drupal_user) {
     user_login_finalize($drupal_user);
     $the_user = \Drupal::currentUser();
-    $username = CosignSharedFunctions::cosign_retrieve_remote_user();
+    $username = self::cosign_retrieve_remote_user();
     if ($the_user->getAccountName() != $username) {
       \Drupal::logger('cosign')->notice('User attempted login and the cosign username: @remote_user, did not match the drupal username: @drupal_user', array('@remote_user' => $username, '@drupal_user' => $the_user->getAccountName()));
       user_logout();
@@ -186,7 +186,7 @@ class CosignSharedFunctions {
       $new_user['name'] = $cosign_name;
       $new_user['status'] = 1;
       $new_user['password'] = user_password();
-      if (CosignSharedFunctions::cosign_is_friend_account($cosign_name)) {
+      if (self::cosign_is_friend_account($cosign_name)) {
         // friend account
         $new_user['mail'] = $cosign_name;
       }
@@ -197,7 +197,7 @@ class CosignSharedFunctions {
       $account->enforceIsNew();
       $account->save();
 
-      return CosignSharedFunctions::cosign_login_user($account);
+      return self::cosign_login_user($account);
     }
   }
 }

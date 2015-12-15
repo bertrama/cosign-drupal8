@@ -6,14 +6,14 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Drupal\cosign\CosignFunctions\CosignSharedFunctions;
+use Drupal\cosign\Shared\Functions;
 
 class CosignSubscriber implements EventSubscriberInterface {
   public function checkRedirection(FilterResponseEvent $event) {
     $request_uri = $event->getRequest()->getRequestUri();
     if (strpos($request_uri, 'user/login') || strpos($request_uri, 'user/register')) {
       $response = $event->getResponse();
-      if (!CosignSharedFunctions::cosign_is_https() 
+      if (!Functions::cosign_is_https() 
         //&& strpos($response->getTargetUrl(), 'ttps://')
       ) {
         //settargeturl will not work if not an event from a redirect
@@ -27,7 +27,7 @@ class CosignSubscriber implements EventSubscriberInterface {
       }
       else {
         $destination = \Drupal::destination()->getAsArray()['destination'];
-        $username = CosignSharedFunctions::cosign_retrieve_remote_user();
+        $username = Functions::cosign_retrieve_remote_user();
         global $base_path;
         if (!$username && \Drupal::config('cosign.settings')->get('cosign_allow_anons_on_https') == 1) {
           $request_uri = \Drupal::config('cosign.settings')->get('cosign_login_path').'?cosign-'.$_SERVER['HTTP_HOST'].'&https://'.$_SERVER['HTTP_HOST'];
@@ -37,7 +37,7 @@ class CosignSubscriber implements EventSubscriberInterface {
           $request_uri = $request_uri . $destination;
         }
         else {
-          CosignSharedFunctions::cosign_user_status($username);
+          Functions::cosign_user_status($username);
           if ($request_uri == $base_path.'user/login' || $request_uri == $base_path.'user/register') {
             $request_uri = $base_path;
           }

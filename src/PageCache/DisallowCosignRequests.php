@@ -9,7 +9,7 @@ namespace Drupal\cosign\PageCache;
 
 use Drupal\Core\PageCache\RequestPolicyInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Drupal\cosign\CosignFunctions\CosignSharedFunctions;
+use Drupal\cosign\Shared\Functions;
 
 /**
  * Cache policy for pages served from cosign.
@@ -27,7 +27,7 @@ class DisallowCosignRequests implements RequestPolicyInterface {
    * {@inheritdoc}
    */
   public function check(Request $request) {
-    $username = CosignSharedFunctions::cosign_retrieve_remote_user();
+    $username = Functions::cosign_retrieve_remote_user();
     if (isset($username) && $username != '') {
       return self::DENY;
     }
